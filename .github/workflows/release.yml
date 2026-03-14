@@ -1,0 +1,56 @@
+name: Windows Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Release Package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $tag = "${{ github.ref_name }}"
+          $packageName = "Rofi-Beats-Windows-$tag"
+          $stageRoot = Join-Path $PWD "dist"
+          $packageRoot = Join-Path $stageRoot $packageName
+
+          if (Test-Path $stageRoot) {
+            Remove-Item $stageRoot -Recurse -Force
+          }
+
+          New-Item -ItemType Directory -Path $packageRoot | Out-Null
+          New-Item -ItemType Directory -Path (Join-Path $packageRoot "windows") | Out-Null
+          New-Item -ItemType Directory -Path (Join-Path $packageRoot "assets") | Out-Null
+
+          Copy-Item "rofi-beats-windows.cmd" $packageRoot
+          Copy-Item "rofi-beats-windows.ps1" $packageRoot
+          Copy-Item "README.md" $packageRoot
+          Copy-Item "LICENSE" $packageRoot
+          Copy-Item "NOTICE" $packageRoot
+          Copy-Item "windows\rofi-beats-windows.ps1" (Join-Path $packageRoot "windows")
+          Copy-Item "windows\stations.json" (Join-Path $packageRoot "windows")
+          Copy-Item "assets\tray-icon.png" (Join-Path $packageRoot "assets")
+          Copy-Item "assets\tray-icon-preview.png" (Join-Path $packageRoot "assets")
+
+          $zipPath = Join-Path $stageRoot ($packageName + ".zip")
+          Compress-Archive -Path (Join-Path $packageRoot "*") -DestinationPath $zipPath -Force
+
+          "ZIP_PATH=$zipPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            ${{ env.ZIP_PATH }}

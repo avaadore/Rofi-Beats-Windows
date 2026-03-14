@@ -1,0 +1,17 @@
+# Editor/IDE
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs/temp
+*.log
+*.tmp
+*.bak
+*.old
+
+# OS
+Thumbs.db
+Desktop.ini

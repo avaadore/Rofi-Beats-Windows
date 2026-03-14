@@ -1,0 +1,18 @@
+Rofi Beats - Windows
+======================
+
+This repository is a Windows reimplementation inspired by:
+  Carbon-Bl4ck/Rofi-Beats
+  https://github.com/Carbon-Bl4ck/Rofi-Beats
+
+The current codebase was rewritten for Windows using PowerShell and WinForms,
+rather than maintained as a line-by-line shell-script port.
+
+Attribution is kept because the project name, initial direction, and a small
+portion of the early station selection were inspired by the original project.
+
+This repository keeps GPL-3.0 licensing to stay conservative about lineage and
+reuse.
+
+Unless otherwise noted, the current Windows implementation is authored by
+repository contributors.

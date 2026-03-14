@@ -1,0 +1,61 @@
+name: Bug report
+description: Report a crash, playback problem, or regression.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+      placeholder: Short description of the issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps so we can reproduce reliably.
+      placeholder: |
+        1. Launch with ...
+        2. Click ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What should have happened?
+    validations:
+      required: true
+
+  - type: input
+    id: ps_version
+    attributes:
+      label: PowerShell version
+      placeholder: e.g. Windows PowerShell 5.1 or PowerShell 7.4
+    validations:
+      required: true
+
+  - type: input
+    id: windows_version
+    attributes:
+      label: Windows version
+      placeholder: e.g. Windows 11 23H2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: player_backend
+    attributes:
+      label: Player backend
+      options:
+        - VLC
+        - FFplay
+        - mpv
+        - Not sure
+    validations:
+      required: true

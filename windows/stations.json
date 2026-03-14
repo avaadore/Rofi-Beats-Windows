@@ -1,0 +1,1501 @@
+[
+  {
+    "id": "lofi-girl",
+    "name": "Lofi Girl",
+    "url": "https://play.streamafrica.net/lofiradio",
+    "country": "US",
+    "language": "instrumental",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "chill",
+      "study"
+    ],
+    "genres": [
+      "lofi",
+      "chillhop"
+    ]
+  },
+  {
+    "id": "lofi-247",
+    "name": "Lofi 24/7",
+    "url": "http://usa9.fastcast4u.com/proxy/jamz?mp=/1",
+    "country": "US",
+    "language": "instrumental",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "chill",
+      "study"
+    ],
+    "genres": [
+      "lofi",
+      "chillhop"
+    ]
+  },
+  {
+    "id": "bigfm-lofi-focus",
+    "name": "bigFM LoFi Focus",
+    "url": "https://stream.bigfm.de/lofifocus/mp3-128/radiobrowser",
+    "country": "DE",
+    "language": "german",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "study",
+      "deep"
+    ],
+    "genres": [
+      "lofi",
+      "chillout"
+    ]
+  },
+  {
+    "id": "fluxfm-chillhop",
+    "name": "FLUX FM Chillhop",
+    "url": "http://streams.fluxfm.de/Chillhop/mp3-320",
+    "country": "DE",
+    "language": "mixed",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "chill",
+      "study"
+    ],
+    "genres": [
+      "lofi",
+      "chillhop",
+      "hiphop"
+    ]
+  },
+  {
+    "id": "chillofi-radio",
+    "name": "Chillofi Radio",
+    "url": "http://streams.dez.ovh:8000/radio.mp3",
+    "country": "FR",
+    "language": "instrumental",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "study",
+      "deep"
+    ],
+    "genres": [
+      "lofi",
+      "chillout"
+    ]
+  },
+  {
+    "id": "box-lofi-radio",
+    "name": "Box Lofi Radio",
+    "url": "https://stream.zeno.fm/tabzverz0fctv",
+    "country": "GH",
+    "language": "instrumental",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "study"
+    ],
+    "genres": [
+      "lofi",
+      "chillhop"
+    ]
+  },
+  {
+    "id": "smooth-chill",
+    "name": "Smooth Chill",
+    "url": "https://media-ssl.musicradio.com/SmoothChill",
+    "country": "UK",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "social",
+      "deep"
+    ],
+    "genres": [
+      "chillout",
+      "pop"
+    ]
+  },
+  {
+    "id": "chilltrax",
+    "name": "Chilltrax",
+    "url": "http://server1.chilltrax.com:9000/",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "focus",
+      "deep"
+    ],
+    "genres": [
+      "chillout",
+      "electronic"
+    ]
+  },
+  {
+    "id": "1fm-chillout-lounge",
+    "name": "1.FM Chillout Lounge",
+    "url": "http://strm112.1.fm/chilloutlounge_mobile_mp3",
+    "country": "CH",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "deep",
+      "social"
+    ],
+    "genres": [
+      "chillout",
+      "lounge"
+    ]
+  },
+  {
+    "id": "101-smooth-jazz",
+    "name": "101 Smooth Jazz",
+    "url": "http://jking.cdnstream1.com/b22139_128mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "focus",
+      "social"
+    ],
+    "genres": [
+      "jazz",
+      "smoothjazz"
+    ]
+  },
+  {
+    "id": "radio-swiss-jazz",
+    "name": "Radio Swiss Jazz",
+    "url": "http://stream.srg-ssr.ch/m/rsj/mp3_128",
+    "country": "CH",
+    "language": "mixed",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "deep",
+      "social"
+    ],
+    "genres": [
+      "jazz",
+      "public-radio"
+    ]
+  },
+  {
+    "id": "jazz-radio-fr",
+    "name": "Jazz Radio",
+    "url": "http://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3",
+    "country": "FR",
+    "language": "french",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "deep",
+      "social"
+    ],
+    "genres": [
+      "jazz",
+      "soul"
+    ]
+  },
+  {
+    "id": "ambient-sleeping-pill",
+    "name": "Ambient Sleeping Pill",
+    "url": "http://radio.stereoscenic.com/asp-h",
+    "country": "US",
+    "language": "instrumental",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "deep",
+      "chill",
+      "study"
+    ],
+    "genres": [
+      "ambient",
+      "sleep"
+    ]
+  },
+  {
+    "id": "ambient-modern",
+    "name": "Ambient Modern",
+    "url": "http://radio.stereoscenic.com/mod-h",
+    "country": "US",
+    "language": "instrumental",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "deep",
+      "focus",
+      "chill"
+    ],
+    "genres": [
+      "ambient",
+      "chillout"
+    ]
+  },
+  {
+    "id": "synthwave-radio",
+    "name": "Synthwave Radio",
+    "url": "https://stream.synthwaveradio.eu/listen/synthwaveradio.eu/radio.mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "focus",
+      "nostalgia"
+    ],
+    "genres": [
+      "synthwave",
+      "electronic"
+    ]
+  },
+  {
+    "id": "synthwave-neon-city",
+    "name": "Synthwave Neon City",
+    "url": "https://synthwave-rex.radioca.st/stream",
+    "country": "NL",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "nostalgia",
+      "social"
+    ],
+    "genres": [
+      "synthwave",
+      "electronic"
+    ]
+  },
+  {
+    "id": "trt-fm",
+    "name": "TRT FM",
+    "url": "https://trt.radyotvonline.net/trtfm",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "social",
+      "energy",
+      "chill"
+    ],
+    "genres": [
+      "turkce",
+      "pop",
+      "public-radio"
+    ]
+  },
+  {
+    "id": "trt-radyo-1",
+    "name": "TRT Radyo 1",
+    "url": "https://trt.radyotvonline.net/trt1",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "deep",
+      "social"
+    ],
+    "genres": [
+      "turkce",
+      "talk",
+      "public-radio"
+    ]
+  },
+  {
+    "id": "trt-turku",
+    "name": "TRT Turku",
+    "url": "https://rd-trtturku.medya.trt.com.tr/master_128.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "nostalgia",
+      "social",
+      "chill"
+    ],
+    "genres": [
+      "turkce",
+      "folk",
+      "turku",
+      "public-radio"
+    ]
+  },
+  {
+    "id": "trt-nagme",
+    "name": "TRT Nagme",
+    "url": "https://rd-trtnagme.medya.trt.com.tr/master.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "nostalgia",
+      "chill",
+      "social"
+    ],
+    "genres": [
+      "turkce",
+      "nostalji",
+      "public-radio"
+    ]
+  },
+  {
+    "id": "trt-radyo-3",
+    "name": "TRT Radyo 3",
+    "url": "http://rd-trtradyo3.medya.trt.com.tr/master.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "focus",
+      "deep",
+      "social"
+    ],
+    "genres": [
+      "classical",
+      "jazz",
+      "public-radio"
+    ]
+  },
+  {
+    "id": "trt-radyo-haber",
+    "name": "TRT Radyo Haber",
+    "url": "https://radio-trtradyohaber.live.trt.com.tr/master.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "deep",
+      "social"
+    ],
+    "genres": [
+      "news",
+      "talk",
+      "public-radio"
+    ]
+  },
+  {
+    "id": "trt-memleketim-fm",
+    "name": "TRT Memleketim FM",
+    "url": "https://radio-trtmemleketimfm.medya.trt.com.tr/master.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "nostalgia",
+      "social",
+      "chill"
+    ],
+    "genres": [
+      "turkce",
+      "folk",
+      "public-radio"
+    ]
+  },
+  {
+    "id": "powerturk-fm",
+    "name": "Power Turk FM",
+    "url": "https://live.powerapp.com.tr/powerturk/abr/powerturk/128/playlist.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "turkce",
+      "pop"
+    ]
+  },
+  {
+    "id": "slow-turk",
+    "name": "Slow Turk",
+    "url": "https://radyo.duhnet.tv/ak_dtvh_slowturk",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "chill",
+      "nostalgia",
+      "deep"
+    ],
+    "genres": [
+      "turkce",
+      "slow",
+      "pop"
+    ]
+  },
+  {
+    "id": "kafa-radyo",
+    "name": "Kafa Radyo",
+    "url": "https://moondigitalmaster.radyotvonline.net/kafaradyo/playlist.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "social",
+      "chill"
+    ],
+    "genres": [
+      "turkce",
+      "talk",
+      "mixed"
+    ]
+  },
+  {
+    "id": "super-fm",
+    "name": "Super FM",
+    "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/SUPER_FM_SC",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "turkce",
+      "pop"
+    ]
+  },
+  {
+    "id": "radyo-45lik",
+    "name": "Radyo 45lik",
+    "url": "https://stream.radyo45lik.com:4545/",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "nostalgia",
+      "social",
+      "chill"
+    ],
+    "genres": [
+      "turkce",
+      "retro",
+      "nostalji"
+    ]
+  },
+  {
+    "id": "kral-fm",
+    "name": "Kral FM",
+    "url": "https://dygedge2.radyotvonline.net/kralfm/playlist.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "social",
+      "nostalgia"
+    ],
+    "genres": [
+      "turkce",
+      "pop",
+      "arabesk"
+    ]
+  },
+  {
+    "id": "radyo-7",
+    "name": "Radyo 7",
+    "url": "http://46.20.3.250/;stream",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "social",
+      "chill"
+    ],
+    "genres": [
+      "turkce",
+      "mixed"
+    ]
+  },
+  {
+    "id": "power-pop-tr",
+    "name": "Power POP",
+    "url": "https://listen.powerapp.com.tr/powerpop/128/chunks.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "social",
+      "energy",
+      "nostalgia"
+    ],
+    "genres": [
+      "pop",
+      "rock",
+      "turkce"
+    ]
+  },
+  {
+    "id": "virgin-radio-tr",
+    "name": "Virgin Radio Turkiye",
+    "url": "http://29103.live.streamtheworld.com/VIRGIN_RADIO_SC",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "rock",
+      "pop",
+      "turkce"
+    ]
+  },
+  {
+    "id": "metro-fm-tr",
+    "name": "Metro FM",
+    "url": "http://28503.live.streamtheworld.com:3690/METRO_FMAAC_SC",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "pop",
+      "electronic",
+      "turkce"
+    ]
+  },
+  {
+    "id": "alem-fm-tr",
+    "name": "Alem FM",
+    "url": "http://turkmedya.radyotvonline.com/turkmedya/alemfm.stream/playlist.m3u8",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "social",
+      "energy"
+    ],
+    "genres": [
+      "pop",
+      "turkce"
+    ]
+  },
+  {
+    "id": "joy-turk",
+    "name": "JOY TURK",
+    "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC?/",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "chill",
+      "social",
+      "nostalgia"
+    ],
+    "genres": [
+      "turkce",
+      "pop"
+    ]
+  },
+  {
+    "id": "radyo-alaturka",
+    "name": "Radyo Alaturka",
+    "url": "https://yayin.jumboserver.net:9100/stream",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "nostalgia",
+      "social"
+    ],
+    "genres": [
+      "turkce",
+      "folk"
+    ]
+  },
+  {
+    "id": "turkulerle-turkiye",
+    "name": "Turkulerle Turkiye",
+    "url": "http://37.247.98.8/stream/22/;",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "deep",
+      "nostalgia",
+      "social"
+    ],
+    "genres": [
+      "folk",
+      "turku",
+      "turkce"
+    ]
+  },
+  {
+    "id": "radyo-seymen",
+    "name": "Radyo Seymen",
+    "url": "https://yayin.radyoseymen.com.tr:1070/stream",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "deep",
+      "nostalgia"
+    ],
+    "genres": [
+      "folk",
+      "turku",
+      "turkce"
+    ]
+  },
+  {
+    "id": "baba-radyo",
+    "name": "Baba Radyo",
+    "url": "http://46.20.7.116/",
+    "country": "TR",
+    "language": "turkish",
+    "turkish": true,
+    "public": true,
+    "moods": [
+      "deep",
+      "nostalgia",
+      "social"
+    ],
+    "genres": [
+      "folk",
+      "turkce"
+    ]
+  },
+  {
+    "id": "rock-antenne",
+    "name": "Rock Antenne",
+    "url": "http://mp3channels.webradio.rockantenne.de/rockantenne",
+    "country": "DE",
+    "language": "german",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "rock"
+    ]
+  },
+  {
+    "id": "bbc-6-music",
+    "name": "BBC Radio 6 Music",
+    "url": "http://as-hls-ww-live.akamaized.net/pool_81827798/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d320000.norewind.m3u8",
+    "country": "UK",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "social",
+      "energy",
+      "deep"
+    ],
+    "genres": [
+      "rock",
+      "electronic",
+      "hiphop"
+    ]
+  },
+  {
+    "id": "bandit-rock",
+    "name": "Bandit Rock",
+    "url": "http://fm02-ice.stream.khz.se/fm02_mp3",
+    "country": "SE",
+    "language": "swedish",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "rock",
+      "metal"
+    ]
+  },
+  {
+    "id": "radio-bob-heavy-metal",
+    "name": "Radio BOB Heavy Metal",
+    "url": "http://mp3channels.radiobob.de/heavy-metal/mp3-192",
+    "country": "DE",
+    "language": "german",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy"
+    ],
+    "genres": [
+      "metal",
+      "rock"
+    ]
+  },
+  {
+    "id": "big-r-80s-metal",
+    "name": "Big R 80s Metal",
+    "url": "http://bigrradio.cdnstream1.com/5186_128",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "nostalgia"
+    ],
+    "genres": [
+      "metal",
+      "rock"
+    ]
+  },
+  {
+    "id": "hard-rock-radio",
+    "name": "Hard Rock Radio FM",
+    "url": "http://67.249.184.45:8015/",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "rock",
+      "metal"
+    ]
+  },
+  {
+    "id": "smooth-jazz-247",
+    "name": "Smooth Jazz 24/7",
+    "url": "http://jking.cdnstream1.com/b75154_128mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "focus",
+      "deep"
+    ],
+    "genres": [
+      "jazz",
+      "smoothjazz"
+    ]
+  },
+  {
+    "id": "npo-soul-jazz",
+    "name": "NPO Radio Soul and Jazz",
+    "url": "http://icecast.omroep.nl/radio6-bb-mp3",
+    "country": "NL",
+    "language": "dutch",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "focus",
+      "social"
+    ],
+    "genres": [
+      "jazz",
+      "soul"
+    ]
+  },
+  {
+    "id": "somafm-groove-salad",
+    "name": "SomaFM Groove Salad",
+    "url": "https://ice5.somafm.com/groovesalad-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "study",
+      "deep"
+    ],
+    "genres": [
+      "ambient",
+      "chillout"
+    ]
+  },
+  {
+    "id": "somafm-drone-zone",
+    "name": "SomaFM Drone Zone",
+    "url": "https://ice4.somafm.com/dronezone-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "deep",
+      "study",
+      "focus"
+    ],
+    "genres": [
+      "ambient"
+    ]
+  },
+  {
+    "id": "nightride-fm",
+    "name": "Nightride FM",
+    "url": "https://stream.nightride.fm/nightride.mp3",
+    "country": "DE",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "deep",
+      "social"
+    ],
+    "genres": [
+      "synthwave",
+      "electronic"
+    ]
+  },
+  {
+    "id": "retrowave-one",
+    "name": "Retrowave One",
+    "url": "http://77.108.192.88:8000/stream",
+    "country": "RU",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "nostalgia",
+      "deep"
+    ],
+    "genres": [
+      "synthwave",
+      "electronic"
+    ]
+  },
+  {
+    "id": "nightwave-plaza",
+    "name": "Nightwave Plaza",
+    "url": "https://radio.plaza.one/ogg",
+    "country": "JP",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "deep",
+      "nostalgia"
+    ],
+    "genres": [
+      "synthwave",
+      "vaporwave",
+      "electronic"
+    ]
+  },
+  {
+    "id": "dance-wave",
+    "name": "Dance Wave",
+    "url": "https://dancewave.online/dance.mp3",
+    "country": "HU",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "house",
+      "trance",
+      "electronic"
+    ]
+  },
+  {
+    "id": "deep-house-lounge",
+    "name": "Deep House Lounge",
+    "url": "http://198.15.94.34:8006/stream",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "social",
+      "deep"
+    ],
+    "genres": [
+      "house",
+      "electronic"
+    ]
+  },
+  {
+    "id": "slam-nl",
+    "name": "SLAM!",
+    "url": "http://stream.slam.nl/slam",
+    "country": "NL",
+    "language": "dutch",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "house",
+      "pop",
+      "electronic"
+    ]
+  },
+  {
+    "id": "amsterdam-trance-1fm",
+    "name": "1.FM Amsterdam Trance",
+    "url": "http://strm112.1.fm/atr_mobile_mp3",
+    "country": "CH",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "deep"
+    ],
+    "genres": [
+      "trance",
+      "electronic"
+    ]
+  },
+  {
+    "id": "psyradio-progressive",
+    "name": "PsyRadio Progressive",
+    "url": "http://streamer.psyradio.org:8010/;listen.mp3",
+    "country": "DE",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "deep"
+    ],
+    "genres": [
+      "trance",
+      "electronic"
+    ]
+  },
+  {
+    "id": "hiphop-rnb-100",
+    "name": "100 Hip Hop and RnB",
+    "url": "https://streaming.shoutcast.com/100-hip-hop-and-rnb-fm",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "hiphop",
+      "rnb"
+    ]
+  },
+  {
+    "id": "deutschrap-rm",
+    "name": "Deutschrap",
+    "url": "https://deutschrap-high.rautemusik.fm/?ref=radiobrowser",
+    "country": "DE",
+    "language": "german",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "social"
+    ],
+    "genres": [
+      "hiphop",
+      "rap"
+    ]
+  },
+  {
+    "id": "la-grosse-reggae",
+    "name": "La Grosse Radio Reggae",
+    "url": "http://hd.lagrosseradio.info/lagrosseradio-reggae-192.mp3",
+    "country": "FR",
+    "language": "french",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "social"
+    ],
+    "genres": [
+      "reggae"
+    ]
+  },
+  {
+    "id": "somafm-heavyweight-reggae",
+    "name": "SomaFM Heavyweight Reggae",
+    "url": "https://ice6.somafm.com/reggae-256-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "social",
+      "deep"
+    ],
+    "genres": [
+      "reggae",
+      "ska"
+    ]
+  },
+  {
+    "id": "classic-fm-uk",
+    "name": "Classic FM UK",
+    "url": "http://ice-the.musicradio.com/ClassicFMMP3",
+    "country": "UK",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "study",
+      "deep"
+    ],
+    "genres": [
+      "classical"
+    ]
+  },
+  {
+    "id": "rai-radio-3",
+    "name": "Rai Radio 3",
+    "url": "http://icestreaming.rai.it/3.mp3",
+    "country": "IT",
+    "language": "italian",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "study",
+      "deep"
+    ],
+    "genres": [
+      "classical",
+      "talk"
+    ]
+  },
+  {
+    "id": "your-classical-relax",
+    "name": "Your Classical Relax",
+    "url": "http://relax.stream.publicradio.org/relax.mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "chill",
+      "study"
+    ],
+    "genres": [
+      "classical",
+      "ambient"
+    ]
+  },
+  {
+    "id": "deep-radio",
+    "name": "Deep Radio",
+    "url": "http://stream.deep.radio/hd",
+    "country": "NL",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "deep",
+      "chill",
+      "social"
+    ],
+    "genres": [
+      "electronic",
+      "house"
+    ]
+  },
+  {
+    "id": "vanilla-deep-flavors",
+    "name": "Vanilla Deep Flavors",
+    "url": "https://stream.vanillaradio.com:8090/live",
+    "country": "GR",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "deep",
+      "chill",
+      "social"
+    ],
+    "genres": [
+      "house",
+      "electronic"
+    ]
+  },
+  {
+    "id": "technolovers-techno",
+    "name": "Technolovers Techno",
+    "url": "https://stream.technolovers.fm/techno?ref=radiobrowser",
+    "country": "DE",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "deep"
+    ],
+    "genres": [
+      "electronic",
+      "techno"
+    ]
+  },
+  {
+    "id": "somafm-deep-space-one",
+    "name": "SomaFM Deep Space One",
+    "url": "http://ice5.somafm.com/deepspaceone-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "deep",
+      "focus",
+      "study"
+    ],
+    "genres": [
+      "ambient",
+      "electronic"
+    ]
+  },
+  {
+    "id": "somafm-space-station-soma",
+    "name": "SomaFM Space Station Soma",
+    "url": "http://ice5.somafm.com/spacestation-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "deep",
+      "chill",
+      "focus"
+    ],
+    "genres": [
+      "ambient",
+      "electronic"
+    ]
+  },
+  {
+    "id": "somafm-synphaera",
+    "name": "SomaFM Synphaera Radio",
+    "url": "http://ice5.somafm.com/synphaera-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "deep",
+      "focus",
+      "study"
+    ],
+    "genres": [
+      "ambient",
+      "electronic",
+      "synthwave"
+    ]
+  },
+  {
+    "id": "somafm-secret-agent",
+    "name": "SomaFM Secret Agent",
+    "url": "http://ice5.somafm.com/secretagent-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "social",
+      "deep"
+    ],
+    "genres": [
+      "electronic",
+      "lounge",
+      "chillout"
+    ]
+  },
+  {
+    "id": "somafm-beat-blender",
+    "name": "SomaFM Beat Blender",
+    "url": "http://ice5.somafm.com/beatblender-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "deep",
+      "social"
+    ],
+    "genres": [
+      "electronic",
+      "house"
+    ]
+  },
+  {
+    "id": "somafm-the-trip",
+    "name": "SomaFM The Trip",
+    "url": "http://ice5.somafm.com/thetrip-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "deep",
+      "focus",
+      "energy"
+    ],
+    "genres": [
+      "electronic",
+      "trance",
+      "ambient"
+    ]
+  },
+  {
+    "id": "somafm-vaporwaves",
+    "name": "SomaFM Vaporwaves",
+    "url": "http://ice5.somafm.com/vaporwaves-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "nostalgia",
+      "chill",
+      "deep"
+    ],
+    "genres": [
+      "vaporwave",
+      "synthwave",
+      "electronic"
+    ]
+  },
+  {
+    "id": "somafm-defcon-radio",
+    "name": "SomaFM DEF CON Radio",
+    "url": "http://ice5.somafm.com/defcon-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "focus",
+      "deep"
+    ],
+    "genres": [
+      "electronic",
+      "techno",
+      "house"
+    ]
+  },
+  {
+    "id": "somafm-mission-control",
+    "name": "SomaFM Mission Control",
+    "url": "http://ice5.somafm.com/missioncontrol-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "study",
+      "deep"
+    ],
+    "genres": [
+      "ambient",
+      "electronic"
+    ]
+  },
+  {
+    "id": "somafm-illinois-street-lounge",
+    "name": "SomaFM Illinois Street Lounge",
+    "url": "http://ice5.somafm.com/illstreet-128-mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "social",
+      "nostalgia"
+    ],
+    "genres": [
+      "lounge",
+      "chillout",
+      "jazz"
+    ]
+  },
+  {
+    "id": "rainwave-all",
+    "name": "Rainwave All",
+    "url": "http://gamestream.rainwave.cc/all.mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "energy",
+      "nostalgia"
+    ],
+    "genres": [
+      "game",
+      "vgm",
+      "electronic"
+    ]
+  },
+  {
+    "id": "rainwave-chill",
+    "name": "Rainwave Chill",
+    "url": "http://gamestream.rainwave.cc/chill.mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "chill",
+      "focus",
+      "study"
+    ],
+    "genres": [
+      "game",
+      "vgm",
+      "ambient"
+    ]
+  },
+  {
+    "id": "rainwave-chiptunes",
+    "name": "Rainwave Chiptunes",
+    "url": "http://gamestream.rainwave.cc/chiptune.mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "energy",
+      "focus",
+      "nostalgia"
+    ],
+    "genres": [
+      "game",
+      "vgm",
+      "chiptune"
+    ]
+  },
+  {
+    "id": "rainwave-covers",
+    "name": "Rainwave Covers",
+    "url": "http://gamestream.rainwave.cc/covers.mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "social",
+      "energy",
+      "nostalgia"
+    ],
+    "genres": [
+      "game",
+      "vgm",
+      "rock",
+      "pop"
+    ]
+  },
+  {
+    "id": "rainwave-game-music",
+    "name": "Rainwave Game Music",
+    "url": "http://gamestream.rainwave.cc/game.mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "energy",
+      "nostalgia"
+    ],
+    "genres": [
+      "game",
+      "vgm",
+      "electronic"
+    ]
+  },
+  {
+    "id": "rainwave-ocremix",
+    "name": "OverClocked Remix Radio",
+    "url": "http://gamestream.rainwave.cc/ocremix.mp3",
+    "country": "US",
+    "language": "english",
+    "turkish": false,
+    "public": true,
+    "moods": [
+      "focus",
+      "energy",
+      "nostalgia"
+    ],
+    "genres": [
+      "game",
+      "vgm",
+      "electronic",
+      "rock"
+    ]
+  }
+]

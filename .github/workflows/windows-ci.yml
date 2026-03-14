@@ -1,0 +1,49 @@
+name: Windows CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate PowerShell Syntax
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          [void][scriptblock]::Create((Get-Content -Path "rofi-beats-windows.ps1" -Raw))
+          [void][scriptblock]::Create((Get-Content -Path "windows/rofi-beats-windows.ps1" -Raw))
+          Write-Host "PowerShell syntax check passed."
+
+      - name: Validate Station Catalog
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $stations = Get-Content -Path "windows/stations.json" -Raw | ConvertFrom-Json
+          if (-not $stations -or @($stations).Count -eq 0) {
+            throw "stations.json is empty."
+          }
+
+          $ids = New-Object "System.Collections.Generic.HashSet[string]" ([System.StringComparer]::OrdinalIgnoreCase)
+          $invalid = 0
+          foreach ($s in @($stations)) {
+            if ([string]::IsNullOrWhiteSpace([string]$s.id)) { $invalid++; continue }
+            if ([string]::IsNullOrWhiteSpace([string]$s.name)) { $invalid++; continue }
+            if ([string]::IsNullOrWhiteSpace([string]$s.url)) { $invalid++; continue }
+            if (-not $ids.Add([string]$s.id)) { $invalid++; continue }
+            if (-not [uri]::IsWellFormedUriString([string]$s.url, [uriKind]::Absolute)) { $invalid++; continue }
+            $uri = [uri][string]$s.url
+            if ($uri.Scheme -notin @("http", "https")) { $invalid++; continue }
+          }
+
+          if ($invalid -gt 0) {
+            throw "Station validation failed. Invalid entries: $invalid"
+          }
+
+          Write-Host "Station catalog validation passed. Count=$(@($stations).Count)"
