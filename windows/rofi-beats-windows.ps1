@@ -457,9 +457,11 @@ $script:hotkeyHandler = $null
 $script:songItem = $null
 $script:bitrateItem = $null
 $script:volumeItem = $null
-$script:volumeUpItem = $null
-$script:volumeDownItem = $null
-$script:muteItem = $null
+$script:volumeSliderHost = $null
+$script:volumeSlider = $null
+$script:volumeSliderValueLabel = $null
+$script:volumeMuteButton = $null
+$script:isSyncingVolumeSlider = $false
 $script:trayIcon = $null
 $script:metadataTimer = $null
 $script:audioSessionTimer = $null
@@ -1312,17 +1314,26 @@ function Update-VolumeMenuState {
         }
     }
 
-    if ($script:volumeUpItem) {
-        $script:volumeUpItem.Enabled = ($isPlaying -and $volume -lt 100)
+    if ($script:volumeSlider) {
+        $script:isSyncingVolumeSlider = $true
+        try {
+            if ($script:volumeSlider.Value -ne $volume) {
+                $script:volumeSlider.Value = $volume
+            }
+            $script:volumeSlider.Enabled = $isPlaying
+            if ($script:volumeSliderValueLabel) {
+                $script:volumeSliderValueLabel.Text = if ($muted) { "Muted ($volume%)" } else { "$volume%" }
+            }
+        } finally {
+            $script:isSyncingVolumeSlider = $false
+        }
     }
 
-    if ($script:volumeDownItem) {
-        $script:volumeDownItem.Enabled = ($isPlaying -and $volume -gt 0)
-    }
-
-    if ($script:muteItem) {
-        $script:muteItem.Text = if ($muted) { "Unmute" } else { "Mute" }
-        $script:muteItem.Enabled = $isPlaying
+    if ($script:volumeMuteButton) {
+        $script:volumeMuteButton.Enabled = $isPlaying
+        $script:volumeMuteButton.Tag = [bool]$muted
+        $script:volumeMuteButton.AccessibleName = if ($muted) { "Unmute" } else { "Mute" }
+        $script:volumeMuteButton.Invalidate()
     }
 }
 
@@ -2811,6 +2822,120 @@ function New-MenuItem {
     return $item
 }
 
+function New-VolumeSliderHost {
+    $panel = New-Object System.Windows.Forms.Panel
+    $panel.Size = New-Object System.Drawing.Size(220, 54)
+    $panel.Margin = New-Object System.Windows.Forms.Padding(0)
+
+    $title = New-Object System.Windows.Forms.Label
+    $title.Text = "Session volume"
+    $title.AutoSize = $true
+    $title.Location = New-Object System.Drawing.Point(10, 6)
+    $panel.Controls.Add($title)
+
+    $valueLabel = New-Object System.Windows.Forms.Label
+    $valueLabel.Text = "{0}%" -f (Get-ProfileSessionVolume)
+    $valueLabel.AutoSize = $true
+    $valueLabel.Location = New-Object System.Drawing.Point(145, 6)
+    $panel.Controls.Add($valueLabel)
+
+    $muteButton = New-Object System.Windows.Forms.Button
+    $muteButton.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+    $muteButton.FlatAppearance.BorderSize = 0
+    $muteButton.BackColor = [System.Drawing.SystemColors]::ControlLightLight
+    $muteButton.Size = New-Object System.Drawing.Size(28, 24)
+    $muteButton.Location = New-Object System.Drawing.Point(10, 24)
+    $muteButton.TabStop = $false
+    $muteButton.Tag = $false
+    $muteButton.Add_Click({
+            Toggle-PlayerSessionMute
+        })
+    $muteButton.Add_Paint({
+            param($sender, $eventArgs)
+
+            if (-not $sender -or -not $eventArgs) {
+                return
+            }
+
+            $g = $eventArgs.Graphics
+            $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+
+            $bounds = $sender.ClientRectangle
+            $muted = [bool]$sender.Tag
+            $foreColor = if ($sender.Enabled) { [System.Drawing.Color]::FromArgb(45, 45, 48) } else { [System.Drawing.SystemColors]::GrayText }
+            $accentColor = if ($sender.Enabled) { [System.Drawing.Color]::FromArgb(21, 101, 192) } else { [System.Drawing.SystemColors]::GrayText }
+
+            $bgBrush = New-Object System.Drawing.SolidBrush($sender.BackColor)
+            $speakerBrush = New-Object System.Drawing.SolidBrush($foreColor)
+            $linePen = New-Object System.Drawing.Pen($accentColor, 1.6)
+            $mutePen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(198, 40, 40), 1.8)
+
+            try {
+                $g.FillRectangle($bgBrush, $bounds)
+
+                $points = [System.Drawing.Point[]]@(
+                    (New-Object System.Drawing.Point(6, 11)),
+                    (New-Object System.Drawing.Point(10, 11)),
+                    (New-Object System.Drawing.Point(14, 7)),
+                    (New-Object System.Drawing.Point(14, 17)),
+                    (New-Object System.Drawing.Point(10, 13)),
+                    (New-Object System.Drawing.Point(6, 13))
+                )
+                $g.FillPolygon($speakerBrush, $points)
+
+                if ($muted) {
+                    $g.DrawLine($mutePen, 18, 8, 23, 16)
+                    $g.DrawLine($mutePen, 23, 8, 18, 16)
+                } else {
+                    $g.DrawArc($linePen, 15, 8, 6, 8, -45, 90)
+                    $g.DrawArc($linePen, 17, 6, 9, 12, -45, 90)
+                }
+            } finally {
+                $mutePen.Dispose()
+                $linePen.Dispose()
+                $speakerBrush.Dispose()
+                $bgBrush.Dispose()
+            }
+        })
+    $panel.Controls.Add($muteButton)
+
+    $track = New-Object System.Windows.Forms.TrackBar
+    $track.AutoSize = $false
+    $track.Minimum = 0
+    $track.Maximum = 100
+    $track.SmallChange = 5
+    $track.LargeChange = 10
+    $track.TickFrequency = 10
+    $track.TickStyle = [System.Windows.Forms.TickStyle]::None
+    $track.Size = New-Object System.Drawing.Size(166, 24)
+    $track.Location = New-Object System.Drawing.Point(42, 24)
+    $track.Value = [Math]::Max([Math]::Min((Get-ProfileSessionVolume), 100), 0)
+    $track.Add_ValueChanged({
+            param($sender, $eventArgs)
+
+            if ($script:isSyncingVolumeSlider) {
+                return
+            }
+
+            if ($sender -and $sender.PSObject.Properties["Value"]) {
+                Set-PlayerSessionVolume -VolumePercent ([int]$sender.Value)
+            }
+        })
+    $panel.Controls.Add($track)
+
+    $sliderHost = New-Object System.Windows.Forms.ToolStripControlHost($panel)
+    $sliderHost.AutoSize = $false
+    $sliderHost.Size = $panel.Size
+    $sliderHost.Margin = New-Object System.Windows.Forms.Padding(0)
+    $sliderHost.Padding = New-Object System.Windows.Forms.Padding(0)
+
+    $script:volumeSlider = $track
+    $script:volumeSliderValueLabel = $valueLabel
+    $script:volumeMuteButton = $muteButton
+
+    return $sliderHost
+}
+
 function Exit-App {
     if ($script:isExiting) {
         return
@@ -2864,6 +2989,11 @@ function Exit-App {
         }
     } catch {
     }
+
+    $script:volumeSliderHost = $null
+    $script:volumeSlider = $null
+    $script:volumeSliderValueLabel = $null
+    $script:volumeMuteButton = $null
 
     [System.Windows.Forms.Application]::ExitThread()
 }
@@ -2941,9 +3071,7 @@ function Initialize-Tray {
         [void]$genreMenu.DropDownItems.Add($genreItem)
     }
 
-    $script:volumeUpItem = New-MenuItem -Text "Volume +" -OnClick { Adjust-PlayerSessionVolume -Delta 5 }
-    $script:volumeDownItem = New-MenuItem -Text "Volume -" -OnClick { Adjust-PlayerSessionVolume -Delta -5 }
-    $script:muteItem = New-MenuItem -Text "Mute" -OnClick { Toggle-PlayerSessionMute }
+    $script:volumeSliderHost = New-VolumeSliderHost
     $stopItem = New-MenuItem -Text "Stop playback" -OnClick { Stop-Playback }
     $exitItem = New-MenuItem -Text "Exit (stops music)" -OnClick { Exit-App }
 
@@ -2952,13 +3080,11 @@ function Initialize-Tray {
     [void]$contextMenu.Items.Add($script:songItem)
     [void]$contextMenu.Items.Add($script:bitrateItem)
     [void]$contextMenu.Items.Add($script:volumeItem)
+    [void]$contextMenu.Items.Add($script:volumeSliderHost)
     [void]$contextMenu.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator))
     [void]$contextMenu.Items.Add($script:toggleItem)
     [void]$contextMenu.Items.Add($pickItem)
     [void]$contextMenu.Items.Add($surpriseItem)
-    [void]$contextMenu.Items.Add($script:volumeUpItem)
-    [void]$contextMenu.Items.Add($script:volumeDownItem)
-    [void]$contextMenu.Items.Add($script:muteItem)
     [void]$contextMenu.Items.Add($moodMenu)
     [void]$contextMenu.Items.Add($genreMenu)
     [void]$contextMenu.Items.Add($onboardingItem)

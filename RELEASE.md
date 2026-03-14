@@ -1,39 +1,62 @@
-# Publish to GitHub
+# Release Flow
 
-This document covers a clean GitHub release flow for this Windows rewrite.
+This repository already has CI and release workflows. Use this flow for normal patch/minor releases.
 
-## 1) Create a new repository on GitHub
-- Create a normal new repository under your account or organization.
-- Do not use GitHub's `Fork` button.
-- Keep `LICENSE` as GPL-3.0 unless you later decide to re-evaluate licensing.
+## 1) Validate locally
 
-## 2) Point this local repo to the new GitHub repository
-If `origin` still points at the original project, rename it first:
+PowerShell syntax:
 
 ```powershell
-git remote rename origin reference
-git remote add origin https://github.com/<YOUR_USER>/<YOUR_REPO>.git
+[void][scriptblock]::Create((Get-Content -Path ".\rofi-beats-windows.ps1" -Raw))
+[void][scriptblock]::Create((Get-Content -Path ".\windows\rofi-beats-windows.ps1" -Raw))
 ```
 
-If this repo has no `origin` yet, just add the new one:
+Station catalog:
 
 ```powershell
-git remote add origin https://github.com/<YOUR_USER>/<YOUR_REPO>.git
+$stations = Get-Content -Path ".\windows\stations.json" -Raw | ConvertFrom-Json
+if (-not $stations -or @($stations).Count -eq 0) { throw "stations.json is empty." }
 ```
 
-## 3) Commit and push
+Manual smoke test on Windows:
+- tray icon appears correctly
+- station playback starts
+- setup wizard still applies a recommendation
+- tray `Session volume` slider changes only app volume
+- mute button next to the slider works
+- stop and exit both shut playback down cleanly
+
+## 2) Commit the release-ready changes
 
 ```powershell
 git add .
-git commit -m "Prepare public Windows release"
-git branch -M main
-git push -u origin main
+git commit -m "Describe the release change"
 ```
 
-## 4) Optional: keep the old remote only as a reference
+## 3) Push `main`
 
 ```powershell
-git remote -v
+git push origin main
 ```
 
-You can keep the renamed remote for historical reference, or remove it later if you no longer need it.
+## 4) Create and push a version tag
+
+Example:
+
+```powershell
+git tag -a v1.0.9 -m "Rofi Beats - Windows v1.0.9"
+git push origin v1.0.9
+```
+
+## 5) Verify GitHub Actions
+
+- `Windows CI` should pass on `main`
+- `Windows Release` should run for the new tag
+- the release should publish a `.zip` package asset
+
+## 6) Add release notes
+
+Keep release notes short and user-facing:
+- what changed
+- any bug fixes worth calling out
+- any download/run guidance if behavior changed

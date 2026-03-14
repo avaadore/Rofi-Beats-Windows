@@ -6,6 +6,7 @@ Thanks for helping improve Rofi Beats - Windows.
 - Windows-only repository
 - Main app script: `windows/rofi-beats-windows.ps1`
 - Station catalog: `windows/stations.json`
+- Avoid PowerShell automatic variable names such as `$PID` and `$Host` in new code, especially inside event handlers.
 
 ## Local Validation
 Run these before opening a PR:
@@ -31,3 +32,4 @@ if (-not $stations -or @($stations).Count -eq 0) { throw "stations.json is empty
 - Keep changes focused.
 - Explain user-visible behavior changes.
 - Include test/repro notes when fixing bugs.
+- If you touch tray/audio behavior, mention how `Session volume`, mute, stop, and exit were tested.

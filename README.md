@@ -13,9 +13,16 @@ Inspired by the original Rofi-Beats idea, but reimplemented for Windows with a n
 - Expanded catalog (83 curated stations) with broader Turkish + global genre coverage
 - Turkish/public station preference support
 - Safer startup volume cap
-- Per-app tray volume controls via Windows Core Audio (`Volume +`, `Volume -`, `Mute`)
+- Per-app tray session-volume slider with embedded mute button via Windows Core Audio
 - Live tray info (bitrate + current song title when stream metadata is available)
 - State/profile persistence in `%APPDATA%\RofiBeats`
+
+## Tray Controls
+- `Play (Ctrl+Alt+B)`: start or stop playback quickly
+- `Choose station...`: open the full picker with mood/genre filters
+- `Session volume`: live app-only volume slider in the tray menu
+- Speaker button next to the slider: mute/unmute only this app session
+- `Startup volume` in the setup wizard: safe initial playback level, separate from live tray volume changes
 
 ## Requirements
 - Windows 11/10
@@ -102,5 +109,5 @@ GitHub Actions workflow is included:
 ## Release Checklist
 - Run local parse checks for both PowerShell scripts.
 - Validate `windows/stations.json` (non-empty, unique `id`, valid `http/https` URLs).
-- Test app manually on Windows: tray open, station play, stop, exit.
+- Test app manually on Windows: tray open, station play, session volume slider, mute button, stop, exit.
 - Push to `main` and verify GitHub Actions passes.

@@ -23,5 +23,7 @@ Include:
 - Automatic player install via `winget` is optional and user-confirmed.
 - The app does not include telemetry or background network beacons beyond
   opening/playing selected station streams.
+- Tray volume control uses Windows Core Audio session APIs and is intended to
+  affect only the app session, not the system master volume.
 - While a station is playing, the app may periodically read ICY metadata from
   the same stream URL to show bitrate and current song title in the tray.
