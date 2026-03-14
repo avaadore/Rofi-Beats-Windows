@@ -473,6 +473,8 @@ $script:audioSessionState = [ordered]@{
     IsMuted       = $false
     LastPid       = $null
     AppliedPid    = $null
+    PendingVolumePercent = $null
+    PendingMuted  = $null
     UpdatedAt     = $null
 }
 
@@ -522,7 +524,7 @@ function New-DefaultProfile {
         discoveryMode  = "balanced"
         volume         = 35
         maxStartupVolume = 45
-        sessionVolume  = 100
+        sessionVolume  = 35
         sessionMuted   = $false
         hotkey         = "Ctrl+Alt+B"
         lastStationId  = $null
@@ -552,9 +554,21 @@ function Initialize-Profile {
         $merged[$key] = $defaultProfile[$key]
     }
 
+    $existingVersion = 1
     if ($null -ne $existing) {
+        $existingVersion = [int](Get-ObjectPropertyValue -Object $existing -Name "version" -Default 1)
         foreach ($prop in $existing.PSObject.Properties) {
             $merged[$prop.Name] = $prop.Value
+        }
+    }
+
+    if ($existingVersion -lt 2) {
+        $merged["version"] = 2
+        $preferredVolume = [Math]::Max([Math]::Min([int](Get-ObjectPropertyValue -Object ([pscustomobject]$merged) -Name "volume" -Default 35), 100), 0)
+        $hasExplicitSessionVolume = ($null -ne $existing -and $existing.PSObject.Properties["sessionVolume"])
+        $currentSessionVolume = [int](Get-ObjectPropertyValue -Object ([pscustomobject]$merged) -Name "sessionVolume" -Default 100)
+        if (-not $hasExplicitSessionVolume -or $currentSessionVolume -eq 100) {
+            $merged["sessionVolume"] = $preferredVolume
         }
     }
 
@@ -1208,7 +1222,8 @@ function Try-RestoreState {
 }
 
 function Get-ProfileSessionVolume {
-    $volume = if ($script:profile -and $script:profile.PSObject.Properties["sessionVolume"]) { [int]$script:profile.sessionVolume } else { 100 }
+    $fallbackVolume = if ($script:profile -and $script:profile.PSObject.Properties["volume"]) { [int]$script:profile.volume } else { 35 }
+    $volume = if ($script:profile -and $script:profile.PSObject.Properties["sessionVolume"]) { [int]$script:profile.sessionVolume } else { $fallbackVolume }
     return [Math]::Max([Math]::Min($volume, 100), 0)
 }
 
@@ -1228,7 +1243,8 @@ function Set-ProfileSessionPreferences {
     )
 
     if (-not $script:profile.PSObject.Properties["sessionVolume"]) {
-        $script:profile | Add-Member -NotePropertyName sessionVolume -NotePropertyValue 100
+        $defaultSessionVolume = if ($script:profile -and $script:profile.PSObject.Properties["volume"]) { [int]$script:profile.volume } else { 35 }
+        $script:profile | Add-Member -NotePropertyName sessionVolume -NotePropertyValue $defaultSessionVolume
     }
     if (-not $script:profile.PSObject.Properties["sessionMuted"]) {
         $script:profile | Add-Member -NotePropertyName sessionMuted -NotePropertyValue $false
@@ -1278,6 +1294,8 @@ function Reset-AudioSessionState {
     $script:audioSessionState.IsMuted = Get-ProfileSessionMuted
     $script:audioSessionState.LastPid = $null
     $script:audioSessionState.AppliedPid = $null
+    $script:audioSessionState.PendingVolumePercent = $null
+    $script:audioSessionState.PendingMuted = $null
     $script:audioSessionState.UpdatedAt = (Get-Date).ToString("o")
 }
 
@@ -1329,6 +1347,22 @@ function Set-AudioSessionSnapshot {
     Update-VolumeMenuState
 }
 
+function Set-PendingAudioSessionApply {
+    param(
+        [Parameter(Mandatory = $true)]
+        [int]$VolumePercent,
+        [bool]$IsMuted = $false
+    )
+
+    $script:audioSessionState.PendingVolumePercent = [Math]::Max([Math]::Min([int]$VolumePercent, 100), 0)
+    $script:audioSessionState.PendingMuted = [bool]$IsMuted
+}
+
+function Clear-PendingAudioSessionApply {
+    $script:audioSessionState.PendingVolumePercent = $null
+    $script:audioSessionState.PendingMuted = $null
+}
+
 function Get-PlayerAudioSessionSnapshot {
     param(
         [int]$ProcessId = 0
@@ -1376,9 +1410,13 @@ function Refresh-PlayerAudioSessionState {
     return $true
 }
 
-function Apply-PlayerAudioSessionProfile {
+function Apply-PlayerAudioSessionState {
     param(
-        [int]$ProcessId = 0
+        [int]$ProcessId = 0,
+        [Parameter(Mandatory = $true)]
+        [int]$VolumePercent,
+        [bool]$Muted = $false,
+        [switch]$PersistToProfile
     )
 
     $playerProcessId = if ($ProcessId -gt 0) { [int]$ProcessId } else { Get-CurrentPlayerProcessId }
@@ -1386,14 +1424,14 @@ function Apply-PlayerAudioSessionProfile {
         return $false
     }
 
-    [single]$targetScalar = [single](Get-ProfileSessionVolume / 100.0)
-    [bool]$targetMuted = Get-ProfileSessionMuted
+    $clampedVolume = [Math]::Max([Math]::Min([int]$VolumePercent, 100), 0)
+    [single]$targetScalar = [single]($clampedVolume / 100.0)
     [single]$appliedScalar = 1.0
     [bool]$appliedMuted = $false
 
     $applied = $false
     try {
-        $applied = [AudioSessionHelper]::TrySetState($playerProcessId, $targetScalar, $targetMuted, [ref]$appliedScalar, [ref]$appliedMuted)
+        $applied = [AudioSessionHelper]::TrySetState($playerProcessId, $targetScalar, $Muted, [ref]$appliedScalar, [ref]$appliedMuted)
     } catch {
         return $false
     }
@@ -1402,10 +1440,23 @@ function Apply-PlayerAudioSessionProfile {
         return $false
     }
 
+    if ($PersistToProfile) {
+        Set-ProfileSessionPreferences -VolumePercent $clampedVolume -Muted $Muted | Out-Null
+    }
+
     $script:audioSessionState.AppliedPid = $playerProcessId
+    Clear-PendingAudioSessionApply
     $appliedPercent = [int][Math]::Round([Math]::Max([Math]::Min([double]$appliedScalar, 1.0), 0.0) * 100)
     Set-AudioSessionSnapshot -ProcessId $playerProcessId -VolumePercent $appliedPercent -IsMuted ([bool]$appliedMuted)
     return $true
+}
+
+function Apply-PlayerAudioSessionProfile {
+    param(
+        [int]$ProcessId = 0
+    )
+
+    return (Apply-PlayerAudioSessionState -ProcessId $ProcessId -VolumePercent (Get-ProfileSessionVolume) -Muted (Get-ProfileSessionMuted))
 }
 
 function Set-PlayerSessionVolume {
@@ -1415,15 +1466,17 @@ function Set-PlayerSessionVolume {
     )
 
     $clamped = [Math]::Max([Math]::Min([int]$VolumePercent, 100), 0)
-    Set-ProfileSessionPreferences -VolumePercent $clamped -Muted $false | Out-Null
 
     $playerProcessId = Get-CurrentPlayerProcessId
     if ($playerProcessId -gt 0) {
-        $applied = Apply-PlayerAudioSessionProfile -ProcessId $playerProcessId
+        Set-PendingAudioSessionApply -VolumePercent $clamped -IsMuted $false
+        $applied = Apply-PlayerAudioSessionState -ProcessId $playerProcessId -VolumePercent $clamped -Muted $false -PersistToProfile
         if (-not $applied) {
+            Set-ProfileSessionPreferences -VolumePercent $clamped -Muted $false | Out-Null
             Set-AudioSessionSnapshot -ProcessId $playerProcessId -VolumePercent $clamped -IsMuted $false
         }
     } else {
+        Set-ProfileSessionPreferences -VolumePercent $clamped -Muted $false | Out-Null
         Set-AudioSessionSnapshot -VolumePercent $clamped -IsMuted $false
     }
 
@@ -1446,16 +1499,19 @@ function Set-PlayerSessionMute {
         [bool]$Muted
     )
 
-    Set-ProfileSessionPreferences -Muted $Muted | Out-Null
+    $targetVolume = if ($script:audioSessionState -and $null -ne $script:audioSessionState.VolumePercent) { [int]$script:audioSessionState.VolumePercent } else { Get-ProfileSessionVolume }
 
     $playerProcessId = Get-CurrentPlayerProcessId
     if ($playerProcessId -gt 0) {
-        $applied = Apply-PlayerAudioSessionProfile -ProcessId $playerProcessId
+        Set-PendingAudioSessionApply -VolumePercent $targetVolume -IsMuted $Muted
+        $applied = Apply-PlayerAudioSessionState -ProcessId $playerProcessId -VolumePercent $targetVolume -Muted $Muted -PersistToProfile
         if (-not $applied) {
-            Set-AudioSessionSnapshot -ProcessId $playerProcessId -VolumePercent (Get-ProfileSessionVolume) -IsMuted $Muted
+            Set-ProfileSessionPreferences -Muted $Muted | Out-Null
+            Set-AudioSessionSnapshot -ProcessId $playerProcessId -VolumePercent $targetVolume -IsMuted $Muted
         }
     } else {
-        Set-AudioSessionSnapshot -VolumePercent (Get-ProfileSessionVolume) -IsMuted $Muted
+        Set-ProfileSessionPreferences -Muted $Muted | Out-Null
+        Set-AudioSessionSnapshot -VolumePercent $targetVolume -IsMuted $Muted
     }
 
     Update-TrayStatus
@@ -1495,11 +1551,14 @@ function Start-AudioSessionTimer {
                     return
                 }
 
-                if ($script:audioSessionState.AppliedPid -ne $playerProcessId) {
-                    if (-not (Apply-PlayerAudioSessionProfile -ProcessId $playerProcessId)) {
-                        Refresh-PlayerAudioSessionState -ProcessId $playerProcessId | Out-Null
+                $pendingVolume = Get-ObjectPropertyValue -Object $script:audioSessionState -Name "PendingVolumePercent"
+                $pendingMuted = [bool](Get-ObjectPropertyValue -Object $script:audioSessionState -Name "PendingMuted" -Default $false)
+                if ($null -ne $pendingVolume) {
+                    if (-not (Apply-PlayerAudioSessionState -ProcessId $playerProcessId -VolumePercent ([int]$pendingVolume) -Muted $pendingMuted)) {
                         return
                     }
+                } elseif ($script:audioSessionState.AppliedPid -ne $playerProcessId) {
+                    Refresh-PlayerAudioSessionState -ProcessId $playerProcessId | Out-Null
                 } else {
                     Refresh-PlayerAudioSessionState -ProcessId $playerProcessId | Out-Null
                 }
@@ -1977,10 +2036,11 @@ function Start-Station {
     $volume = [Math]::Max([Math]::Min([int]$script:profile.volume, 100), 0)
     $maxStartupVolume = if ($script:profile.PSObject.Properties["maxStartupVolume"] -and $null -ne $script:profile.maxStartupVolume) { [int]$script:profile.maxStartupVolume } else { 45 }
     $maxStartupVolume = [Math]::Max([Math]::Min($maxStartupVolume, 100), 0)
-    $startupVolume = [Math]::Min($volume, $maxStartupVolume)
+    $sessionVolume = Get-ProfileSessionVolume
+    $startupSessionVolume = [Math]::Min($sessionVolume, $maxStartupVolume)
     switch ($script:playerBackend) {
         "vlc" {
-            $vlcVolume = [Math]::Max([Math]::Min([int][Math]::Round($startupVolume * 2.56), 256), 0)
+            $vlcVolume = 256
             $args = @(
                 "--intf", "dummy",
                 "--dummy-quiet",
@@ -1998,7 +2058,7 @@ function Start-Station {
                 "-autoexit",
                 "-loglevel", "quiet",
                 "-window_title", $script:playerMarker,
-                "-volume", $startupVolume,
+                "-volume", 100,
                 [string]$Station.url
             )
         }
@@ -2007,7 +2067,7 @@ function Start-Station {
                 "--no-video",
                 "--force-window=no",
                 "--title=$script:playerMarker",
-                "--volume=$startupVolume",
+                "--volume=100",
                 "--quiet",
                 [string]$Station.url
             )
@@ -2025,11 +2085,18 @@ function Start-Station {
     Reset-StreamInfo
     Save-State
     Update-TrayStatus
+    Set-PendingAudioSessionApply -VolumePercent $startupSessionVolume -IsMuted (Get-ProfileSessionMuted)
     Start-AudioSessionTimer -InitialIntervalMs 350
     Start-MetadataTimer
     Show-Balloon -Title $script:AppName -Text ("Playing: {0}" -f [string]$Station.name)
     try {
-        Apply-PlayerAudioSessionProfile -ProcessId ([int]$proc.Id) | Out-Null
+        $deadline = (Get-Date).AddMilliseconds(2500)
+        while ((Get-Date) -lt $deadline) {
+            if (Apply-PlayerAudioSessionState -ProcessId ([int]$proc.Id) -VolumePercent $startupSessionVolume -Muted (Get-ProfileSessionMuted)) {
+                break
+            }
+            Start-Sleep -Milliseconds 100
+        }
         Refresh-StreamInfo -TimeoutMs 1500
     } catch {
     }
@@ -2412,6 +2479,11 @@ function Show-OnboardingWizard {
             $script:profile.preferTurkish = $chkTurkish.Checked
             $script:profile.publicOnly = $chkPublic.Checked
             $script:profile.volume = [int]$trackVol.Value
+            if ($script:profile.PSObject.Properties["sessionVolume"]) {
+                $script:profile.sessionVolume = [int]$trackVol.Value
+            } else {
+                $script:profile | Add-Member -NotePropertyName sessionVolume -NotePropertyValue ([int]$trackVol.Value)
+            }
             $script:profile.hasOnboarded = $true
             Save-Profile
 
