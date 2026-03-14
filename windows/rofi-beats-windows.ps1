@@ -1334,8 +1334,8 @@ function Get-PlayerAudioSessionSnapshot {
         [int]$ProcessId = 0
     )
 
-    $pid = if ($ProcessId -gt 0) { [int]$ProcessId } else { Get-CurrentPlayerProcessId }
-    if ($pid -le 0) {
+    $playerProcessId = if ($ProcessId -gt 0) { [int]$ProcessId } else { Get-CurrentPlayerProcessId }
+    if ($playerProcessId -le 0) {
         return $null
     }
 
@@ -1344,7 +1344,7 @@ function Get-PlayerAudioSessionSnapshot {
     $found = $false
 
     try {
-        $found = [AudioSessionHelper]::TryGetSnapshot($pid, [ref]$volumeScalar, [ref]$muted)
+        $found = [AudioSessionHelper]::TryGetSnapshot($playerProcessId, [ref]$volumeScalar, [ref]$muted)
     } catch {
         return $null
     }
@@ -1355,7 +1355,7 @@ function Get-PlayerAudioSessionSnapshot {
 
     $percent = [int][Math]::Round([Math]::Max([Math]::Min([double]$volumeScalar, 1.0), 0.0) * 100)
     return [pscustomobject]@{
-        ProcessId      = $pid
+        ProcessId      = $playerProcessId
         VolumePercent  = $percent
         IsMuted        = [bool]$muted
     }
@@ -1381,8 +1381,8 @@ function Apply-PlayerAudioSessionProfile {
         [int]$ProcessId = 0
     )
 
-    $pid = if ($ProcessId -gt 0) { [int]$ProcessId } else { Get-CurrentPlayerProcessId }
-    if ($pid -le 0) {
+    $playerProcessId = if ($ProcessId -gt 0) { [int]$ProcessId } else { Get-CurrentPlayerProcessId }
+    if ($playerProcessId -le 0) {
         return $false
     }
 
@@ -1393,7 +1393,7 @@ function Apply-PlayerAudioSessionProfile {
 
     $applied = $false
     try {
-        $applied = [AudioSessionHelper]::TrySetState($pid, $targetScalar, $targetMuted, [ref]$appliedScalar, [ref]$appliedMuted)
+        $applied = [AudioSessionHelper]::TrySetState($playerProcessId, $targetScalar, $targetMuted, [ref]$appliedScalar, [ref]$appliedMuted)
     } catch {
         return $false
     }
@@ -1402,9 +1402,9 @@ function Apply-PlayerAudioSessionProfile {
         return $false
     }
 
-    $script:audioSessionState.AppliedPid = $pid
+    $script:audioSessionState.AppliedPid = $playerProcessId
     $appliedPercent = [int][Math]::Round([Math]::Max([Math]::Min([double]$appliedScalar, 1.0), 0.0) * 100)
-    Set-AudioSessionSnapshot -ProcessId $pid -VolumePercent $appliedPercent -IsMuted ([bool]$appliedMuted)
+    Set-AudioSessionSnapshot -ProcessId $playerProcessId -VolumePercent $appliedPercent -IsMuted ([bool]$appliedMuted)
     return $true
 }
 
@@ -1417,11 +1417,11 @@ function Set-PlayerSessionVolume {
     $clamped = [Math]::Max([Math]::Min([int]$VolumePercent, 100), 0)
     Set-ProfileSessionPreferences -VolumePercent $clamped -Muted $false | Out-Null
 
-    $pid = Get-CurrentPlayerProcessId
-    if ($pid -gt 0) {
-        $applied = Apply-PlayerAudioSessionProfile -ProcessId $pid
+    $playerProcessId = Get-CurrentPlayerProcessId
+    if ($playerProcessId -gt 0) {
+        $applied = Apply-PlayerAudioSessionProfile -ProcessId $playerProcessId
         if (-not $applied) {
-            Set-AudioSessionSnapshot -ProcessId $pid -VolumePercent $clamped -IsMuted $false
+            Set-AudioSessionSnapshot -ProcessId $playerProcessId -VolumePercent $clamped -IsMuted $false
         }
     } else {
         Set-AudioSessionSnapshot -VolumePercent $clamped -IsMuted $false
@@ -1448,11 +1448,11 @@ function Set-PlayerSessionMute {
 
     Set-ProfileSessionPreferences -Muted $Muted | Out-Null
 
-    $pid = Get-CurrentPlayerProcessId
-    if ($pid -gt 0) {
-        $applied = Apply-PlayerAudioSessionProfile -ProcessId $pid
+    $playerProcessId = Get-CurrentPlayerProcessId
+    if ($playerProcessId -gt 0) {
+        $applied = Apply-PlayerAudioSessionProfile -ProcessId $playerProcessId
         if (-not $applied) {
-            Set-AudioSessionSnapshot -ProcessId $pid -VolumePercent (Get-ProfileSessionVolume) -IsMuted $Muted
+            Set-AudioSessionSnapshot -ProcessId $playerProcessId -VolumePercent (Get-ProfileSessionVolume) -IsMuted $Muted
         }
     } else {
         Set-AudioSessionSnapshot -VolumePercent (Get-ProfileSessionVolume) -IsMuted $Muted
@@ -1490,18 +1490,18 @@ function Start-AudioSessionTimer {
                     return
                 }
 
-                $pid = Get-CurrentPlayerProcessId
-                if ($pid -le 0) {
+                $playerProcessId = Get-CurrentPlayerProcessId
+                if ($playerProcessId -le 0) {
                     return
                 }
 
-                if ($script:audioSessionState.AppliedPid -ne $pid) {
-                    if (-not (Apply-PlayerAudioSessionProfile -ProcessId $pid)) {
-                        Refresh-PlayerAudioSessionState -ProcessId $pid | Out-Null
+                if ($script:audioSessionState.AppliedPid -ne $playerProcessId) {
+                    if (-not (Apply-PlayerAudioSessionProfile -ProcessId $playerProcessId)) {
+                        Refresh-PlayerAudioSessionState -ProcessId $playerProcessId | Out-Null
                         return
                     }
                 } else {
-                    Refresh-PlayerAudioSessionState -ProcessId $pid | Out-Null
+                    Refresh-PlayerAudioSessionState -ProcessId $playerProcessId | Out-Null
                 }
 
                 if ($script:audioSessionTimer -and $script:audioSessionTimer.Interval -lt 2000) {
