@@ -13,6 +13,7 @@ Inspired by the original Rofi-Beats idea, but reimplemented for Windows with a n
 - Expanded catalog (83 curated stations) with broader Turkish + global genre coverage
 - Turkish/public station preference support
 - Safer startup volume cap
+- Per-app tray volume controls via Windows Core Audio (`Volume +`, `Volume -`, `Mute`)
 - Live tray info (bitrate + current song title when stream metadata is available)
 - State/profile persistence in `%APPDATA%\RofiBeats`
 

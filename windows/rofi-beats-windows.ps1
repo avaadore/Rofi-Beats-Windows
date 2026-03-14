@@ -81,6 +81,291 @@ if (-not ("RofiHotkeyWindow" -as [type])) {
     }
 }
 
+$audioSessionTypeSource = @"
+using System;
+using System.Runtime.InteropServices;
+
+public enum EDataFlow
+{
+    eRender = 0,
+    eCapture = 1,
+    eAll = 2
+}
+
+public enum ERole
+{
+    eConsole = 0,
+    eMultimedia = 1,
+    eCommunications = 2
+}
+
+[Flags]
+public enum CLSCTX : uint
+{
+    INPROC_SERVER = 0x1,
+    INPROC_HANDLER = 0x2,
+    LOCAL_SERVER = 0x4,
+    REMOTE_SERVER = 0x10,
+    ALL = INPROC_SERVER | INPROC_HANDLER | LOCAL_SERVER | REMOTE_SERVER
+}
+
+[ComImport]
+[Guid("BCDE0395-E52F-467C-8E3D-C4579291692E")]
+public class MMDeviceEnumeratorComObject
+{
+}
+
+[ComImport]
+[Guid("A95664D2-9614-4F35-A746-DE8DB63617E6")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IMMDeviceEnumerator
+{
+    int EnumAudioEndpoints(EDataFlow dataFlow, int dwStateMask, out object ppDevices);
+    [PreserveSig]
+    int GetDefaultAudioEndpoint(EDataFlow dataFlow, ERole role, out IMMDevice ppEndpoint);
+    int GetDevice(string pwstrId, out IMMDevice ppDevice);
+    int RegisterEndpointNotificationCallback(IntPtr pClient);
+    int UnregisterEndpointNotificationCallback(IntPtr pClient);
+}
+
+[ComImport]
+[Guid("D666063F-1587-4E43-81F1-B948E807363F")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IMMDevice
+{
+    [PreserveSig]
+    int Activate(ref Guid iid, CLSCTX dwClsCtx, IntPtr pActivationParams, [MarshalAs(UnmanagedType.IUnknown)] out object ppInterface);
+}
+
+[ComImport]
+[Guid("77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IAudioSessionManager2
+{
+    int GetAudioSessionControl(IntPtr AudioSessionGuid, uint StreamFlags, out IntPtr SessionControl);
+    int GetSimpleAudioVolume(IntPtr AudioSessionGuid, uint StreamFlags, out IntPtr AudioVolume);
+    [PreserveSig]
+    int GetSessionEnumerator(out IAudioSessionEnumerator SessionEnum);
+}
+
+[ComImport]
+[Guid("E2F5BB11-0570-40CA-ACDD-3AA01277DEE8")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IAudioSessionEnumerator
+{
+    [PreserveSig]
+    int GetCount(out int SessionCount);
+    [PreserveSig]
+    int GetSession(int SessionCount, out IAudioSessionControl Session);
+}
+
+[ComImport]
+[Guid("F4B1A599-7266-4319-A8CA-E70ACB11E8CD")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IAudioSessionControl
+{
+    int GetState(out int pRetVal);
+    int GetDisplayName([MarshalAs(UnmanagedType.LPWStr)] out string pRetVal);
+    int SetDisplayName([MarshalAs(UnmanagedType.LPWStr)] string Value, ref Guid EventContext);
+    int GetIconPath([MarshalAs(UnmanagedType.LPWStr)] out string pRetVal);
+    int SetIconPath([MarshalAs(UnmanagedType.LPWStr)] string Value, ref Guid EventContext);
+    int GetGroupingParam(out Guid pRetVal);
+    int SetGroupingParam(ref Guid Override, ref Guid EventContext);
+    int RegisterAudioSessionNotification(IntPtr NewNotifications);
+    int UnregisterAudioSessionNotification(IntPtr NewNotifications);
+}
+
+[ComImport]
+[Guid("BFB7FF88-7239-4FC9-8FA2-07C950BE9C6D")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IAudioSessionControl2 : IAudioSessionControl
+{
+    new int GetState(out int pRetVal);
+    new int GetDisplayName([MarshalAs(UnmanagedType.LPWStr)] out string pRetVal);
+    new int SetDisplayName([MarshalAs(UnmanagedType.LPWStr)] string Value, ref Guid EventContext);
+    new int GetIconPath([MarshalAs(UnmanagedType.LPWStr)] out string pRetVal);
+    new int SetIconPath([MarshalAs(UnmanagedType.LPWStr)] string Value, ref Guid EventContext);
+    new int GetGroupingParam(out Guid pRetVal);
+    new int SetGroupingParam(ref Guid Override, ref Guid EventContext);
+    new int RegisterAudioSessionNotification(IntPtr NewNotifications);
+    new int UnregisterAudioSessionNotification(IntPtr NewNotifications);
+    int GetSessionIdentifier([MarshalAs(UnmanagedType.LPWStr)] out string pRetVal);
+    int GetSessionInstanceIdentifier([MarshalAs(UnmanagedType.LPWStr)] out string pRetVal);
+    [PreserveSig]
+    int GetProcessId(out uint pRetVal);
+    int IsSystemSoundsSession();
+    int SetDuckingPreference(bool optOut);
+}
+
+[ComImport]
+[Guid("87CE5498-68D6-44E5-9215-6DA47EF883D8")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface ISimpleAudioVolume
+{
+    [PreserveSig]
+    int SetMasterVolume(float fLevel, ref Guid EventContext);
+    [PreserveSig]
+    int GetMasterVolume(out float pfLevel);
+    [PreserveSig]
+    int SetMute([MarshalAs(UnmanagedType.Bool)] bool bMute, ref Guid EventContext);
+    [PreserveSig]
+    int GetMute([MarshalAs(UnmanagedType.Bool)] out bool pbMute);
+}
+
+public static class AudioSessionHelper
+{
+    private delegate void SessionAction(ISimpleAudioVolume volume);
+
+    public static bool TryGetSnapshot(int processId, out float volumeScalar, out bool muted)
+    {
+        return VisitSessions(processId, null, out volumeScalar, out muted);
+    }
+
+    public static bool TrySetState(int processId, float volumeScalar, bool muted, out float appliedVolumeScalar, out bool appliedMuted)
+    {
+        float targetVolume = ClampScalar(volumeScalar);
+        return VisitSessions(
+            processId,
+            delegate (ISimpleAudioVolume volume)
+            {
+                Guid context = Guid.Empty;
+                Marshal.ThrowExceptionForHR(volume.SetMasterVolume(targetVolume, ref context));
+                Marshal.ThrowExceptionForHR(volume.SetMute(muted, ref context));
+            },
+            out appliedVolumeScalar,
+            out appliedMuted);
+    }
+
+    private static bool VisitSessions(int processId, SessionAction action, out float volumeScalar, out bool muted)
+    {
+        volumeScalar = 1.0f;
+        muted = false;
+        if (processId <= 0)
+        {
+            return false;
+        }
+
+        IMMDeviceEnumerator deviceEnumerator = null;
+        IMMDevice device = null;
+        object managerObject = null;
+        IAudioSessionManager2 sessionManager = null;
+        IAudioSessionEnumerator sessionEnumerator = null;
+
+        try
+        {
+            deviceEnumerator = (IMMDeviceEnumerator)(new MMDeviceEnumeratorComObject());
+            Marshal.ThrowExceptionForHR(deviceEnumerator.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia, out device));
+
+            Guid sessionManagerGuid = typeof(IAudioSessionManager2).GUID;
+            Marshal.ThrowExceptionForHR(device.Activate(ref sessionManagerGuid, CLSCTX.ALL, IntPtr.Zero, out managerObject));
+            sessionManager = (IAudioSessionManager2)managerObject;
+
+            Marshal.ThrowExceptionForHR(sessionManager.GetSessionEnumerator(out sessionEnumerator));
+
+            int sessionCount = 0;
+            Marshal.ThrowExceptionForHR(sessionEnumerator.GetCount(out sessionCount));
+
+            bool matched = false;
+            for (int i = 0; i < sessionCount; i++)
+            {
+                IAudioSessionControl sessionControl = null;
+                try
+                {
+                    Marshal.ThrowExceptionForHR(sessionEnumerator.GetSession(i, out sessionControl));
+                    IAudioSessionControl2 sessionControl2 = sessionControl as IAudioSessionControl2;
+                    if (sessionControl2 == null)
+                    {
+                        continue;
+                    }
+
+                    uint sessionProcessId = 0;
+                    Marshal.ThrowExceptionForHR(sessionControl2.GetProcessId(out sessionProcessId));
+                    if (sessionProcessId != processId)
+                    {
+                        continue;
+                    }
+
+                    ISimpleAudioVolume simpleVolume = sessionControl as ISimpleAudioVolume;
+                    if (simpleVolume == null)
+                    {
+                        continue;
+                    }
+
+                    float currentVolume = 1.0f;
+                    bool currentMuted = false;
+                    Marshal.ThrowExceptionForHR(simpleVolume.GetMasterVolume(out currentVolume));
+                    Marshal.ThrowExceptionForHR(simpleVolume.GetMute(out currentMuted));
+
+                    volumeScalar = ClampScalar(currentVolume);
+                    muted = currentMuted;
+
+                    if (action != null)
+                    {
+                        action(simpleVolume);
+                        Marshal.ThrowExceptionForHR(simpleVolume.GetMasterVolume(out currentVolume));
+                        Marshal.ThrowExceptionForHR(simpleVolume.GetMute(out currentMuted));
+                        volumeScalar = ClampScalar(currentVolume);
+                        muted = currentMuted;
+                    }
+
+                    matched = true;
+                }
+                finally
+                {
+                    ReleaseComObject(sessionControl);
+                }
+            }
+
+            return matched;
+        }
+        catch
+        {
+            return false;
+        }
+        finally
+        {
+            ReleaseComObject(sessionEnumerator);
+            ReleaseComObject(sessionManager);
+            ReleaseComObject(device);
+            ReleaseComObject(deviceEnumerator);
+        }
+    }
+
+    private static float ClampScalar(float value)
+    {
+        if (value < 0.0f)
+        {
+            return 0.0f;
+        }
+
+        if (value > 1.0f)
+        {
+            return 1.0f;
+        }
+
+        return value;
+    }
+
+    private static void ReleaseComObject(object value)
+    {
+        if (value != null && Marshal.IsComObject(value))
+        {
+            try
+            {
+                Marshal.ReleaseComObject(value);
+            }
+            catch
+            {
+            }
+        }
+    }
+}
+"@
+
+if (-not ("AudioSessionHelper" -as [type])) {
+    Add-Type -TypeDefinition $audioSessionTypeSource -Language CSharp
+}
+
 $script:AppName = "Rofi Beats - Windows"
 $script:ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $script:StationsPath = Join-Path $script:ScriptRoot "stations.json"
@@ -171,12 +456,24 @@ $script:toggleItem = $null
 $script:hotkeyHandler = $null
 $script:songItem = $null
 $script:bitrateItem = $null
+$script:volumeItem = $null
+$script:volumeUpItem = $null
+$script:volumeDownItem = $null
+$script:muteItem = $null
 $script:trayIcon = $null
 $script:metadataTimer = $null
+$script:audioSessionTimer = $null
 $script:streamInfo = [ordered]@{
     StreamTitle = $null
     BitrateKbps = $null
     UpdatedAt   = $null
+}
+$script:audioSessionState = [ordered]@{
+    VolumePercent = 100
+    IsMuted       = $false
+    LastPid       = $null
+    AppliedPid    = $null
+    UpdatedAt     = $null
 }
 
 function Ensure-DataRoot {
@@ -225,6 +522,8 @@ function New-DefaultProfile {
         discoveryMode  = "balanced"
         volume         = 35
         maxStartupVolume = 45
+        sessionVolume  = 100
+        sessionMuted   = $false
         hotkey         = "Ctrl+Alt+B"
         lastStationId  = $null
         preferredPlayer = "auto"
@@ -261,6 +560,7 @@ function Initialize-Profile {
 
     $script:profile = [pscustomobject]$merged
     Save-Profile
+    Reset-AudioSessionState
 }
 
 function To-Array {
@@ -907,6 +1207,326 @@ function Try-RestoreState {
     }
 }
 
+function Get-ProfileSessionVolume {
+    $volume = if ($script:profile -and $script:profile.PSObject.Properties["sessionVolume"]) { [int]$script:profile.sessionVolume } else { 100 }
+    return [Math]::Max([Math]::Min($volume, 100), 0)
+}
+
+function Get-ProfileSessionMuted {
+    if ($script:profile -and $script:profile.PSObject.Properties["sessionMuted"]) {
+        return [bool]$script:profile.sessionMuted
+    }
+
+    return $false
+}
+
+function Set-ProfileSessionPreferences {
+    param(
+        [int]$VolumePercent = -1,
+        [object]$Muted = $null,
+        [switch]$SkipSave
+    )
+
+    if (-not $script:profile.PSObject.Properties["sessionVolume"]) {
+        $script:profile | Add-Member -NotePropertyName sessionVolume -NotePropertyValue 100
+    }
+    if (-not $script:profile.PSObject.Properties["sessionMuted"]) {
+        $script:profile | Add-Member -NotePropertyName sessionMuted -NotePropertyValue $false
+    }
+
+    $changed = $false
+    if ($VolumePercent -ge 0) {
+        $clamped = [Math]::Max([Math]::Min([int]$VolumePercent, 100), 0)
+        if ([int]$script:profile.sessionVolume -ne $clamped) {
+            $script:profile.sessionVolume = $clamped
+            $changed = $true
+        }
+    }
+
+    if ($null -ne $Muted) {
+        $mutedValue = [bool]$Muted
+        if ([bool]$script:profile.sessionMuted -ne $mutedValue) {
+            $script:profile.sessionMuted = $mutedValue
+            $changed = $true
+        }
+    }
+
+    if ($changed -and -not $SkipSave) {
+        Save-Profile
+    }
+
+    return $changed
+}
+
+function Get-CurrentPlayerProcessId {
+    if ($script:playerProcess) {
+        try {
+            $script:playerProcess.Refresh()
+            if (-not $script:playerProcess.HasExited) {
+                return [int]$script:playerProcess.Id
+            }
+        } catch {
+            $script:playerProcess = $null
+        }
+    }
+
+    return 0
+}
+
+function Reset-AudioSessionState {
+    $script:audioSessionState.VolumePercent = Get-ProfileSessionVolume
+    $script:audioSessionState.IsMuted = Get-ProfileSessionMuted
+    $script:audioSessionState.LastPid = $null
+    $script:audioSessionState.AppliedPid = $null
+    $script:audioSessionState.UpdatedAt = (Get-Date).ToString("o")
+}
+
+function Update-VolumeMenuState {
+    $volume = if ($script:audioSessionState -and $null -ne $script:audioSessionState.VolumePercent) { [int]$script:audioSessionState.VolumePercent } else { Get-ProfileSessionVolume }
+    $muted = if ($script:audioSessionState) { [bool]$script:audioSessionState.IsMuted } else { Get-ProfileSessionMuted }
+    $isPlaying = Get-IsPlaying
+
+    if ($script:volumeItem) {
+        if ($muted) {
+            $script:volumeItem.Text = "Volume: Muted ($volume%)"
+        } else {
+            $script:volumeItem.Text = "Volume: $volume%"
+        }
+    }
+
+    if ($script:volumeUpItem) {
+        $script:volumeUpItem.Enabled = ($isPlaying -and $volume -lt 100)
+    }
+
+    if ($script:volumeDownItem) {
+        $script:volumeDownItem.Enabled = ($isPlaying -and $volume -gt 0)
+    }
+
+    if ($script:muteItem) {
+        $script:muteItem.Text = if ($muted) { "Unmute" } else { "Mute" }
+        $script:muteItem.Enabled = $isPlaying
+    }
+}
+
+function Set-AudioSessionSnapshot {
+    param(
+        [int]$ProcessId = 0,
+        [int]$VolumePercent = 100,
+        [bool]$IsMuted = $false,
+        [switch]$PersistToProfile
+    )
+
+    $clamped = [Math]::Max([Math]::Min([int]$VolumePercent, 100), 0)
+    $script:audioSessionState.VolumePercent = $clamped
+    $script:audioSessionState.IsMuted = [bool]$IsMuted
+    $script:audioSessionState.LastPid = if ($ProcessId -gt 0) { [int]$ProcessId } else { $null }
+    $script:audioSessionState.UpdatedAt = (Get-Date).ToString("o")
+
+    if ($PersistToProfile) {
+        Set-ProfileSessionPreferences -VolumePercent $clamped -Muted $IsMuted | Out-Null
+    }
+
+    Update-VolumeMenuState
+}
+
+function Get-PlayerAudioSessionSnapshot {
+    param(
+        [int]$ProcessId = 0
+    )
+
+    $pid = if ($ProcessId -gt 0) { [int]$ProcessId } else { Get-CurrentPlayerProcessId }
+    if ($pid -le 0) {
+        return $null
+    }
+
+    [single]$volumeScalar = 1.0
+    [bool]$muted = $false
+    $found = $false
+
+    try {
+        $found = [AudioSessionHelper]::TryGetSnapshot($pid, [ref]$volumeScalar, [ref]$muted)
+    } catch {
+        return $null
+    }
+
+    if (-not $found) {
+        return $null
+    }
+
+    $percent = [int][Math]::Round([Math]::Max([Math]::Min([double]$volumeScalar, 1.0), 0.0) * 100)
+    return [pscustomobject]@{
+        ProcessId      = $pid
+        VolumePercent  = $percent
+        IsMuted        = [bool]$muted
+    }
+}
+
+function Refresh-PlayerAudioSessionState {
+    param(
+        [int]$ProcessId = 0,
+        [switch]$SkipPersist
+    )
+
+    $snapshot = Get-PlayerAudioSessionSnapshot -ProcessId $ProcessId
+    if (-not $snapshot) {
+        return $false
+    }
+
+    Set-AudioSessionSnapshot -ProcessId ([int]$snapshot.ProcessId) -VolumePercent ([int]$snapshot.VolumePercent) -IsMuted ([bool]$snapshot.IsMuted) -PersistToProfile:(-not $SkipPersist)
+    return $true
+}
+
+function Apply-PlayerAudioSessionProfile {
+    param(
+        [int]$ProcessId = 0
+    )
+
+    $pid = if ($ProcessId -gt 0) { [int]$ProcessId } else { Get-CurrentPlayerProcessId }
+    if ($pid -le 0) {
+        return $false
+    }
+
+    [single]$targetScalar = [single](Get-ProfileSessionVolume / 100.0)
+    [bool]$targetMuted = Get-ProfileSessionMuted
+    [single]$appliedScalar = 1.0
+    [bool]$appliedMuted = $false
+
+    $applied = $false
+    try {
+        $applied = [AudioSessionHelper]::TrySetState($pid, $targetScalar, $targetMuted, [ref]$appliedScalar, [ref]$appliedMuted)
+    } catch {
+        return $false
+    }
+
+    if (-not $applied) {
+        return $false
+    }
+
+    $script:audioSessionState.AppliedPid = $pid
+    $appliedPercent = [int][Math]::Round([Math]::Max([Math]::Min([double]$appliedScalar, 1.0), 0.0) * 100)
+    Set-AudioSessionSnapshot -ProcessId $pid -VolumePercent $appliedPercent -IsMuted ([bool]$appliedMuted)
+    return $true
+}
+
+function Set-PlayerSessionVolume {
+    param(
+        [Parameter(Mandatory = $true)]
+        [int]$VolumePercent
+    )
+
+    $clamped = [Math]::Max([Math]::Min([int]$VolumePercent, 100), 0)
+    Set-ProfileSessionPreferences -VolumePercent $clamped -Muted $false | Out-Null
+
+    $pid = Get-CurrentPlayerProcessId
+    if ($pid -gt 0) {
+        $applied = Apply-PlayerAudioSessionProfile -ProcessId $pid
+        if (-not $applied) {
+            Set-AudioSessionSnapshot -ProcessId $pid -VolumePercent $clamped -IsMuted $false
+        }
+    } else {
+        Set-AudioSessionSnapshot -VolumePercent $clamped -IsMuted $false
+    }
+
+    Update-TrayStatus
+}
+
+function Adjust-PlayerSessionVolume {
+    param(
+        [Parameter(Mandatory = $true)]
+        [int]$Delta
+    )
+
+    $current = if ($script:audioSessionState -and $null -ne $script:audioSessionState.VolumePercent) { [int]$script:audioSessionState.VolumePercent } else { Get-ProfileSessionVolume }
+    Set-PlayerSessionVolume -VolumePercent ($current + $Delta)
+}
+
+function Set-PlayerSessionMute {
+    param(
+        [Parameter(Mandatory = $true)]
+        [bool]$Muted
+    )
+
+    Set-ProfileSessionPreferences -Muted $Muted | Out-Null
+
+    $pid = Get-CurrentPlayerProcessId
+    if ($pid -gt 0) {
+        $applied = Apply-PlayerAudioSessionProfile -ProcessId $pid
+        if (-not $applied) {
+            Set-AudioSessionSnapshot -ProcessId $pid -VolumePercent (Get-ProfileSessionVolume) -IsMuted $Muted
+        }
+    } else {
+        Set-AudioSessionSnapshot -VolumePercent (Get-ProfileSessionVolume) -IsMuted $Muted
+    }
+
+    Update-TrayStatus
+}
+
+function Toggle-PlayerSessionMute {
+    $currentMuted = if ($script:audioSessionState) { [bool]$script:audioSessionState.IsMuted } else { Get-ProfileSessionMuted }
+    Set-PlayerSessionMute -Muted (-not $currentMuted)
+}
+
+function Start-AudioSessionTimer {
+    param(
+        [int]$InitialIntervalMs = 500
+    )
+
+    if ($script:audioSessionTimer) {
+        try {
+            $script:audioSessionTimer.Stop()
+            $script:audioSessionTimer.Interval = [Math]::Max($InitialIntervalMs, 250)
+            $script:audioSessionTimer.Start()
+        } catch {
+        }
+        return
+    }
+
+    $script:audioSessionTimer = New-Object System.Windows.Forms.Timer
+    $script:audioSessionTimer.Interval = [Math]::Max($InitialIntervalMs, 250)
+    $script:audioSessionTimer.Add_Tick({
+            try {
+                if (-not (Get-IsPlaying)) {
+                    Stop-AudioSessionTimer
+                    return
+                }
+
+                $pid = Get-CurrentPlayerProcessId
+                if ($pid -le 0) {
+                    return
+                }
+
+                if ($script:audioSessionState.AppliedPid -ne $pid) {
+                    if (-not (Apply-PlayerAudioSessionProfile -ProcessId $pid)) {
+                        Refresh-PlayerAudioSessionState -ProcessId $pid | Out-Null
+                        return
+                    }
+                } else {
+                    Refresh-PlayerAudioSessionState -ProcessId $pid | Out-Null
+                }
+
+                if ($script:audioSessionTimer -and $script:audioSessionTimer.Interval -lt 2000) {
+                    $script:audioSessionTimer.Interval = 2000
+                }
+            } catch {
+            }
+        })
+    $script:audioSessionTimer.Start()
+}
+
+function Stop-AudioSessionTimer {
+    if (-not $script:audioSessionTimer) {
+        return
+    }
+
+    try {
+        $script:audioSessionTimer.Stop()
+        $script:audioSessionTimer.Dispose()
+    } catch {
+    }
+
+    $script:audioSessionTimer = $null
+}
+
 function Set-NotifyText {
     param(
         [Parameter(Mandatory = $true)]
@@ -1237,6 +1857,8 @@ function Update-TrayStatus {
         return
     }
 
+    Update-VolumeMenuState
+
     if (Get-IsPlaying) {
         $currentName = if ($script:currentStation) { [string]$script:currentStation.name } else { "Unknown station" }
         $songText = if ($script:streamInfo -and -not [string]::IsNullOrWhiteSpace([string]$script:streamInfo.StreamTitle)) { [string]$script:streamInfo.StreamTitle } else { "Unknown" }
@@ -1252,6 +1874,9 @@ function Update-TrayStatus {
         $script:toggleItem.Text = "Stop (Ctrl+Alt+B)"
         if (-not $script:metadataTimer) {
             Start-MetadataTimer
+        }
+        if (-not $script:audioSessionTimer) {
+            Start-AudioSessionTimer
         }
         if ($songText -ne "Unknown") {
             Set-NotifyText -Text "$script:AppName - $songText"
@@ -1269,6 +1894,7 @@ function Update-TrayStatus {
         }
         $script:toggleItem.Text = "Play (Ctrl+Alt+B)"
         Stop-MetadataTimer
+        Stop-AudioSessionTimer
         Set-NotifyText -Text $script:AppName
     }
 }
@@ -1315,7 +1941,9 @@ function Stop-Playback {
     $script:playerProcess = $null
     $script:currentStation = $null
     Stop-MetadataTimer
+    Stop-AudioSessionTimer
     Reset-StreamInfo
+    Reset-AudioSessionState
     Save-State
     Update-TrayStatus
 
@@ -1391,14 +2019,17 @@ function Start-Station {
 
     $script:playerProcess = $proc
     $script:currentStation = $Station
+    Reset-AudioSessionState
     $script:profile.lastStationId = [string]$Station.id
     Save-Profile
     Reset-StreamInfo
     Save-State
     Update-TrayStatus
+    Start-AudioSessionTimer -InitialIntervalMs 350
     Start-MetadataTimer
     Show-Balloon -Title $script:AppName -Text ("Playing: {0}" -f [string]$Station.name)
     try {
+        Apply-PlayerAudioSessionProfile -ProcessId ([int]$proc.Id) | Out-Null
         Refresh-StreamInfo -TimeoutMs 1500
     } catch {
     }
@@ -1741,7 +2372,7 @@ function Show-OnboardingWizard {
     $form.Controls.Add($chkPublic)
 
     $lblVol = New-Object System.Windows.Forms.Label
-    $lblVol.Text = "Default volume"
+    $lblVol.Text = "Startup volume"
     $lblVol.AutoSize = $true
     $lblVol.Location = New-Object System.Drawing.Point(310, 190)
     $form.Controls.Add($lblVol)
@@ -2126,6 +2757,11 @@ function Exit-App {
     }
 
     try {
+        Stop-AudioSessionTimer
+    } catch {
+    }
+
+    try {
         if ($script:hotkeyWindow) {
             if ($script:hotkeyHandler) {
                 try {
@@ -2171,6 +2807,8 @@ function Initialize-Tray {
     $script:songItem.Enabled = $false
     $script:bitrateItem = New-MenuItem -Text "Bitrate: -"
     $script:bitrateItem.Enabled = $false
+    $script:volumeItem = New-MenuItem -Text "Volume: 100%"
+    $script:volumeItem.Enabled = $false
     $script:toggleItem = New-MenuItem -Text "Play (Ctrl+Alt+B)" -OnClick { Toggle-Playback }
     $pickItem = New-MenuItem -Text "Choose station..." -OnClick { Show-StationPicker }
     $surpriseItem = New-MenuItem -Text "Surprise station" -OnClick {
@@ -2231,6 +2869,9 @@ function Initialize-Tray {
         [void]$genreMenu.DropDownItems.Add($genreItem)
     }
 
+    $script:volumeUpItem = New-MenuItem -Text "Volume +" -OnClick { Adjust-PlayerSessionVolume -Delta 5 }
+    $script:volumeDownItem = New-MenuItem -Text "Volume -" -OnClick { Adjust-PlayerSessionVolume -Delta -5 }
+    $script:muteItem = New-MenuItem -Text "Mute" -OnClick { Toggle-PlayerSessionMute }
     $stopItem = New-MenuItem -Text "Stop playback" -OnClick { Stop-Playback }
     $exitItem = New-MenuItem -Text "Exit (stops music)" -OnClick { Exit-App }
 
@@ -2238,10 +2879,14 @@ function Initialize-Tray {
     [void]$contextMenu.Items.Add($script:currentItem)
     [void]$contextMenu.Items.Add($script:songItem)
     [void]$contextMenu.Items.Add($script:bitrateItem)
+    [void]$contextMenu.Items.Add($script:volumeItem)
     [void]$contextMenu.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator))
     [void]$contextMenu.Items.Add($script:toggleItem)
     [void]$contextMenu.Items.Add($pickItem)
     [void]$contextMenu.Items.Add($surpriseItem)
+    [void]$contextMenu.Items.Add($script:volumeUpItem)
+    [void]$contextMenu.Items.Add($script:volumeDownItem)
+    [void]$contextMenu.Items.Add($script:muteItem)
     [void]$contextMenu.Items.Add($moodMenu)
     [void]$contextMenu.Items.Add($genreMenu)
     [void]$contextMenu.Items.Add($onboardingItem)
